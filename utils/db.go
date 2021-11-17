@@ -25,6 +25,9 @@ func ConnectToDB(databaseUrl string) (*gorm.DB, error) {
 func Migrate() {
 	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Session{})
 }
+func DropTables() {
+	db.Migrator().DropTable(&models.User{}, &models.Product{}, &models.Session{})
+}
 
 func GetItemsByField(model interface{}, field string, value interface{}) *gorm.DB {
 	return db.Find(model, field+" = ?", value)

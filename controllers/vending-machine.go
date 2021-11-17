@@ -26,11 +26,7 @@ func Deposit(response http.ResponseWriter, request *http.Request) {
 
 	var user models.User
 
-	tx := utils.GetItemByPrimaryKey(&user, uint(uintID))
-	if tx.RowsAffected < 1 {
-		utils.GetError(fmt.Errorf("user not found"), http.StatusUnauthorized, response)
-		return
-	}
+	utils.GetItemByPrimaryKey(&user, uint(uintID))
 
 	if strings.ToLower(user.Role) != "buyer" {
 		utils.GetError(fmt.Errorf("user is not a buyer"), http.StatusNotAcceptable, response)
@@ -38,10 +34,7 @@ func Deposit(response http.ResponseWriter, request *http.Request) {
 	}
 
 	var depositRequest models.DepositRequest
-	if err = utils.ParseJSONFromRequest(request, &depositRequest); err != nil {
-		utils.GetError(errors.New("bad deposit data"), http.StatusBadRequest, response)
-		return
-	}
+	utils.ParseJSONFromRequest(request, &depositRequest)
 
 	if !Contains(depositRequest.Amount, possibleDepositAmounts) {
 		utils.GetError(errors.New("you can only deposit, 50, 100, 200, 500, 1000 coins"), http.StatusBadRequest, response)
@@ -49,12 +42,7 @@ func Deposit(response http.ResponseWriter, request *http.Request) {
 	}
 
 	updateMap := map[string]interface{}{}
-	updateMap["deposit"] = depositRequest.Amount
-
-	if len(updateMap) == 0 {
-		utils.GetError(errors.New("no amount input"), http.StatusBadRequest, response)
-		return
-	}
+	updateMap["deposit"] = depositRequest.Amount + user.Deposit
 
 	result := utils.Db.Table("users").Where("id = ?", uint(uintID)).Updates(updateMap)
 
@@ -112,11 +100,7 @@ func BuyProduct(response http.ResponseWriter, request *http.Request) {
 
 	var user models.User
 
-	tx := utils.GetItemByPrimaryKey(&user, uint(uintID))
-	if tx.RowsAffected < 1 {
-		utils.GetError(fmt.Errorf("user not found"), http.StatusUnauthorized, response)
-		return
-	}
+	utils.GetItemByPrimaryKey(&user, uint(uintID))
 
 	if strings.ToLower(user.Role) != "buyer" {
 		utils.GetError(fmt.Errorf("user is not a buyer"), http.StatusNotAcceptable, response)
@@ -124,14 +108,11 @@ func BuyProduct(response http.ResponseWriter, request *http.Request) {
 	}
 
 	var buyRequest models.BuyRequest
-	if err = utils.ParseJSONFromRequest(request, &buyRequest); err != nil {
-		utils.GetError(errors.New("bad buy data"), http.StatusBadRequest, response)
-		return
-	}
+	utils.ParseJSONFromRequest(request, &buyRequest)
 
 	var product models.Product
 
-	tx = utils.GetItemByPrimaryKey(&product, uint(buyRequest.ProductID))
+	tx := utils.GetItemByPrimaryKey(&product, uint(buyRequest.ProductID))
 	if tx.RowsAffected < 1 {
 		utils.GetError(fmt.Errorf("product not found"), http.StatusUnauthorized, response)
 		return
