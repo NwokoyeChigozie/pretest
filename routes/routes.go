@@ -48,5 +48,5 @@ func (h *Handler) SetupRoutes() {
 
 func VersionHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Gradely Pretest App - Version 0.0255\n")
+	fmt.Fprintf(w, "Pretest App - Version 0.0255\n")
 }
